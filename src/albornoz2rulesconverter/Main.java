@@ -1,13 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package albornoz2rulesconverter;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFileChooser;
@@ -27,7 +25,7 @@ public class Main {
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             List<String> lista = rulesFileCreator(fc.getSelectedFile());
-            escribirArchivoRules(lista,fc.getSelectedFile().getCanonicalPath());
+            escribirArchivoRules(lista, fc.getSelectedFile().getCanonicalPath());
         }
     }
 
@@ -48,24 +46,24 @@ public class Main {
                 if (linea.startsWith("UD") || 0 == linea.length()) {
                     continue;
                 } else {
-                    
+
                     if (linea.startsWith("IF")) {
-                        
+
                         if (regla.length() != 0) {
                             listaReglas.add(regla.toString());
                         }
                         String lineaAParsear[] = linea.split("\\s");
                         regla = new StringBuilder();
-                        regla = regla.append(lineaAParsear[1]);
+                        regla = regla.append(lineaAParsear[1].replaceAll("\\s", ""));
 
                     } else if (linea.startsWith("AND")) {
                         String lineaAParsear[] = linea.split("\\s");
-                        regla = regla.append('^').append(lineaAParsear[1]);
+                        regla = regla.append('^').append(lineaAParsear[1].replaceAll("\\s", ""));
 
                     } else if (linea.startsWith("THEN")) {
                         String lineaAParsear[] = linea.split("\\s");
                         regla = regla.append('=');
-                        regla = regla.append(lineaAParsear[1]);
+                        regla = regla.append(lineaAParsear[1].replaceAll("\\s", ""));
                     }
                 }
             }
@@ -90,9 +88,15 @@ public class Main {
     }
 
     private static void escribirArchivoRules(List<String> lista, String dir) throws IOException {
-        File f = new File(dir.replace("base2.txt", "reglasAlbornoz.rules"));
-        if(!f.createNewFile()){
-            System.err.println("Hubo un problema al crear el archivo");
+        File f = new File(dir.replace("base2.albornoz", "reglasAlbornoz.rules"));
+        if (!f.createNewFile()) {
+            System.err.println("Hubo un problema al crear el archivo " + f.exists());
+        } else {
+            PrintWriter out = new PrintWriter(new FileWriter(f));
+            for (String linea : lista) {
+                out.println(linea);
+            }
+            out.close();
         }
     }
 }
